@@ -20,7 +20,6 @@ actualizar sus datos y eliminarlas.
 - Contraseñas protegidas con PBKDF2; nunca se guardan en texto plano.
 - Uso de abstracción, encapsulamiento, herencia y polimorfismo.
 - Patrones Singleton y Factory.
-- Pruebas automáticas con JUnit.
 - Ejecutable JAR generado por Maven.
 
 ## Inicio rápido
@@ -62,7 +61,6 @@ SistemaUsuariosTarea4/
 │   │   │   └── App.java     Punto de entrada
 │   │   └── resources/
 │   │       └── database.properties
-│   └── test/                 Pruebas automáticas
 ├── pom.xml
 ├── compilar_y_ejecutar.bat
 └── ejecutar.bat
@@ -71,9 +69,6 @@ SistemaUsuariosTarea4/
 ## Comandos útiles
 
 ```powershell
-# Ejecutar las pruebas
-mvn test
-
 # Compilar el JAR ejecutable
 mvn clean package
 

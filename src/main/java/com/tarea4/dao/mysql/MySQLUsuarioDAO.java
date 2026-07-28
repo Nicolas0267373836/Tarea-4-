@@ -3,191 +3,103 @@ package com.tarea4.dao.mysql;
 import com.tarea4.dao.UsuarioDAO;
 import com.tarea4.database.DatabaseConnection;
 import com.tarea4.model.Usuario;
+import com.tarea4.security.PasswordHasher;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
-/**
- * Implementación MySQL del repositorio de usuarios.
- * Todas las consultas usan PreparedStatement para evitar inyección SQL.
- */
-public final class MySQLUsuarioDAO implements UsuarioDAO {
+public class MySQLUsuarioDAO implements UsuarioDAO {
 
-    private static final String COLUMNAS =
-            "id, usuario, nombre, apellido, telefono, correo, password_hash";
-
-    private final DatabaseConnection database;
-
-    public MySQLUsuarioDAO(DatabaseConnection database) {
-        this.database = database;
+    private Usuario crearUsuario(ResultSet result) throws Exception {
+        Usuario usuario = new Usuario();
+        usuario.setId(result.getInt("id"));
+        usuario.setUsuario(result.getString("usuario"));
+        usuario.setNombre(result.getString("nombre"));
+        usuario.setApellido(result.getString("apellido"));
+        usuario.setTelefono(result.getString("telefono"));
+        usuario.setCorreo(result.getString("correo"));
+        usuario.setPasswordHash(result.getString("password_hash"));
+        return usuario;
     }
 
     @Override
-    public List<Usuario> listarTodos() throws SQLException {
-        String sql = "SELECT " + COLUMNAS + " FROM usuarios ORDER BY nombre, apellido, id";
-        List<Usuario> usuarios = new ArrayList<>();
-
-        try (
-                Connection connection = database.getConnection();
-                PreparedStatement statement = connection.prepareStatement(sql);
-                ResultSet resultSet = statement.executeQuery()
-        ) {
-            while (resultSet.next()) {
-                usuarios.add(mapear(resultSet));
+    public Usuario iniciarSesion(String nombreUsuario, String password) throws Exception {
+        String sql = "SELECT * FROM usuarios WHERE usuario = ?";
+        try (Connection connection = DatabaseConnection.getInstance().getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, nombreUsuario);
+            ResultSet result = statement.executeQuery();
+            if (result.next()) {
+                Usuario usuario = crearUsuario(result);
+                if (PasswordHasher.verificar(password.toCharArray(), usuario.getPasswordHash())) {
+                    return usuario;
+                }
             }
         }
+        return null;
+    }
 
+    @Override
+    public List<Usuario> listarUsuarios() throws Exception {
+        List<Usuario> usuarios = new ArrayList<>();
+        String sql = "SELECT * FROM usuarios ORDER BY id";
+        try (Connection connection = DatabaseConnection.getInstance().getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql);
+             ResultSet result = statement.executeQuery()) {
+            while (result.next()) {
+                usuarios.add(crearUsuario(result));
+            }
+        }
         return usuarios;
     }
 
     @Override
-    public Optional<Usuario> buscarPorUsuario(String nombreUsuario) throws SQLException {
-        String sql = "SELECT " + COLUMNAS + " FROM usuarios WHERE usuario = ?";
-
-        try (
-                Connection connection = database.getConnection();
-                PreparedStatement statement = connection.prepareStatement(sql)
-        ) {
-            statement.setString(1, nombreUsuario);
-
-            try (ResultSet resultSet = statement.executeQuery()) {
-                return resultSet.next()
-                        ? Optional.of(mapear(resultSet))
-                        : Optional.empty();
-            }
-        }
-    }
-
-    @Override
-    public boolean existeUsuario(String nombreUsuario, Long idExcluido) throws SQLException {
-        return existeValor("usuario", nombreUsuario, idExcluido);
-    }
-
-    @Override
-    public boolean existeCorreo(String correo, Long idExcluido) throws SQLException {
-        return existeValor("correo", correo, idExcluido);
-    }
-
-    private boolean existeValor(String columna, String valor, Long idExcluido) throws SQLException {
-        // "columna" solo recibe constantes internas, nunca datos escritos por el usuario.
-        String sql = "SELECT 1 FROM usuarios WHERE " + columna + " = ?"
-                + (idExcluido == null ? "" : " AND id <> ?")
-                + " LIMIT 1";
-
-        try (
-                Connection connection = database.getConnection();
-                PreparedStatement statement = connection.prepareStatement(sql)
-        ) {
-            statement.setString(1, valor);
-            if (idExcluido != null) {
-                statement.setLong(2, idExcluido);
-            }
-
-            try (ResultSet resultSet = statement.executeQuery()) {
-                return resultSet.next();
-            }
-        }
-    }
-
-    @Override
-    public long insertar(Usuario usuario) throws SQLException {
-        String sql = """
-                INSERT INTO usuarios
-                    (usuario, nombre, apellido, telefono, correo, password_hash)
-                VALUES (?, ?, ?, ?, ?, ?)
-                """;
-
-        try (
-                Connection connection = database.getConnection();
-                PreparedStatement statement = connection.prepareStatement(
-                        sql,
-                        Statement.RETURN_GENERATED_KEYS
-                )
-        ) {
+    public void registrar(Usuario usuario, String password) throws Exception {
+        String sql = "INSERT INTO usuarios(usuario, nombre, apellido, telefono, correo, password_hash) VALUES(?,?,?,?,?,?)";
+        try (Connection connection = DatabaseConnection.getInstance().getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, usuario.getUsuario());
             statement.setString(2, usuario.getNombre());
             statement.setString(3, usuario.getApellido());
             statement.setString(4, usuario.getTelefono());
             statement.setString(5, usuario.getCorreo());
-            statement.setString(6, usuario.getPasswordHash());
+            statement.setString(6, PasswordHasher.hash(password.toCharArray()));
             statement.executeUpdate();
-
-            try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
-                if (generatedKeys.next()) {
-                    return generatedKeys.getLong(1);
-                }
-            }
         }
-
-        throw new SQLException("MySQL no devolvió el identificador del nuevo usuario.");
     }
 
     @Override
-    public boolean actualizar(Usuario usuario, boolean actualizarPassword) throws SQLException {
-        String sqlConPassword = """
-                UPDATE usuarios
-                SET usuario = ?, nombre = ?, apellido = ?, telefono = ?, correo = ?,
-                    password_hash = ?
-                WHERE id = ?
-                """;
-        String sqlSinPassword = """
-                UPDATE usuarios
-                SET usuario = ?, nombre = ?, apellido = ?, telefono = ?, correo = ?
-                WHERE id = ?
-                """;
-
-        try (
-                Connection connection = database.getConnection();
-                PreparedStatement statement = connection.prepareStatement(
-                        actualizarPassword ? sqlConPassword : sqlSinPassword
-                )
-        ) {
+    public void actualizar(Usuario usuario, String nuevaPassword) throws Exception {
+        boolean cambiarPassword = nuevaPassword != null && !nuevaPassword.isBlank();
+        String sql = cambiarPassword
+                ? "UPDATE usuarios SET usuario=?, nombre=?, apellido=?, telefono=?, correo=?, password_hash=? WHERE id=?"
+                : "UPDATE usuarios SET usuario=?, nombre=?, apellido=?, telefono=?, correo=? WHERE id=?";
+        try (Connection connection = DatabaseConnection.getInstance().getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, usuario.getUsuario());
             statement.setString(2, usuario.getNombre());
             statement.setString(3, usuario.getApellido());
             statement.setString(4, usuario.getTelefono());
             statement.setString(5, usuario.getCorreo());
-
-            if (actualizarPassword) {
-                statement.setString(6, usuario.getPasswordHash());
-                statement.setLong(7, usuario.getId());
+            if (cambiarPassword) {
+                statement.setString(6, PasswordHasher.hash(nuevaPassword.toCharArray()));
+                statement.setInt(7, usuario.getId());
             } else {
-                statement.setLong(6, usuario.getId());
+                statement.setInt(6, usuario.getId());
             }
-
-            return statement.executeUpdate() == 1;
+            statement.executeUpdate();
         }
     }
 
     @Override
-    public boolean eliminar(long id) throws SQLException {
-        String sql = "DELETE FROM usuarios WHERE id = ?";
-
-        try (
-                Connection connection = database.getConnection();
-                PreparedStatement statement = connection.prepareStatement(sql)
-        ) {
-            statement.setLong(1, id);
-            return statement.executeUpdate() == 1;
+    public void eliminar(int id) throws Exception {
+        try (Connection connection = DatabaseConnection.getInstance().getConnection();
+             PreparedStatement statement = connection.prepareStatement("DELETE FROM usuarios WHERE id=?")) {
+            statement.setInt(1, id);
+            statement.executeUpdate();
         }
-    }
-
-    private Usuario mapear(ResultSet resultSet) throws SQLException {
-        return new Usuario(
-                resultSet.getLong("id"),
-                resultSet.getString("usuario"),
-                resultSet.getString("nombre"),
-                resultSet.getString("apellido"),
-                resultSet.getString("telefono"),
-                resultSet.getString("correo"),
-                resultSet.getString("password_hash")
-        );
     }
 }
-

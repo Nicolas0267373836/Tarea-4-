@@ -1,57 +1,41 @@
 package com.tarea4.database;
 
-import com.tarea4.config.DatabaseConfig;
-
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.SQLException;
+import java.util.Properties;
 
-/**
- * Patrón Singleton: existe una sola instancia encargada de crear conexiones.
- * Se abre una conexión por operación para evitar reutilizar conexiones vencidas.
- */
-public final class DatabaseConnection {
+/* Singleton: una sola clase administra la conexión a MySQL. */
+public class DatabaseConnection {
 
-    private static volatile DatabaseConnection instancia;
-
-    private final DatabaseConfig config;
+    private static DatabaseConnection instance;
+    private String url;
+    private String user;
+    private String password;
 
     private DatabaseConnection() {
-        config = DatabaseConfig.cargar();
-
         try {
+            Properties properties = new Properties();
+            InputStream file = getClass().getResourceAsStream("/database.properties");
+            properties.load(file);
+
+            url = properties.getProperty("db.url");
+            user = properties.getProperty("db.user");
+            password = properties.getProperty("db.password");
             Class.forName("com.mysql.cj.jdbc.Driver");
-        } catch (ClassNotFoundException exception) {
-            throw new IllegalStateException(
-                    "No se encontró MySQL Connector/J. Compila el proyecto con Maven.",
-                    exception
-            );
+        } catch (Exception error) {
+            throw new RuntimeException("Revisa el archivo database.properties", error);
         }
     }
 
     public static DatabaseConnection getInstance() {
-        if (instancia == null) {
-            synchronized (DatabaseConnection.class) {
-                if (instancia == null) {
-                    instancia = new DatabaseConnection();
-                }
-            }
+        if (instance == null) {
+            instance = new DatabaseConnection();
         }
-        return instancia;
+        return instance;
     }
 
-    public Connection getConnection() throws SQLException {
-        return DriverManager.getConnection(
-                config.getUrl(),
-                config.getUsuario(),
-                config.getPassword()
-        );
-    }
-
-    public void probarConexion() throws SQLException {
-        try (Connection ignored = getConnection()) {
-            // Si no se lanza excepción, la conexión está disponible.
-        }
+    public Connection getConnection() throws Exception {
+        return DriverManager.getConnection(url, user, password);
     }
 }
-
