@@ -92,6 +92,5 @@ java -jar target/sistema-usuarios-tarea4.jar
 
 ## Autor
 
-Reemplaza esta sección con tu nombre completo, matrícula y asignatura antes de
-subir el proyecto a GitHub.
+Nicolas Abud 2025-2437
 
