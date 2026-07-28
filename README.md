@@ -26,7 +26,6 @@ actualizar sus datos y eliminarlas.
 ## Inicio rápido
 
 Antes de ejecutar el programa necesitas instalar Java JDK 17, Maven y MySQL.
-Los pasos exactos están en [GUIA_INSTALACION.md](GUIA_INSTALACION.md).
 
 Cuando las herramientas y la base de datos estén preparadas:
 
@@ -41,14 +40,6 @@ También puedes abrir una terminal dentro del proyecto y ejecutar:
 mvn clean package
 java -jar target/sistema-usuarios-tarea4.jar
 ```
-
-## Documentos incluidos
-
-- `GUIA_INSTALACION.md`: instalación, base de datos, ejecución y solución de errores.
-- `EXPLICACION_DEL_PROYECTO.md`: arquitectura y explicación para defender el código.
-- `GUION_VIDEO.md`: preparación y guion cronometrado para el video de dos minutos.
-- `SUBIR_A_GITHUB.md`: instrucciones para crear el repositorio y entregar el enlace.
-- `CHECKLIST_ENTREGA.md`: lista final para no olvidar ningún requisito.
 
 ## Estructura principal
 
@@ -93,4 +84,3 @@ java -jar target/sistema-usuarios-tarea4.jar
 ## Autor
 
 Nicolas Abud 2025-2437
-
