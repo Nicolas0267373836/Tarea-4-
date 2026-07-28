@@ -1,0 +1,5 @@
+# Copia este archivo como database.properties y escribe tus credenciales locales.
+# Nunca subas database.properties a GitHub.
+db.url=jdbc:mysql://localhost:3306/tarea4_usuarios?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=America/La_Paz&characterEncoding=UTF-8
+db.user=root
+db.password=
