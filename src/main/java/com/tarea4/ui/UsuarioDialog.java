@@ -3,6 +3,7 @@ package com.tarea4.ui;
 import com.tarea4.dao.UsuarioDAO;
 import com.tarea4.model.Usuario;
 
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
@@ -11,19 +12,26 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.GridLayout;
+import java.awt.Insets;
 
 public class UsuarioDialog extends JDialog {
 
-    private PrincipalFrame principal;
-    private UsuarioDAO dao;
-    private Usuario usuario;
-    private JTextField usuarioField = new JTextField();
-    private JTextField nombre = new JTextField();
-    private JTextField apellido = new JTextField();
-    private JTextField telefono = new JTextField();
-    private JTextField correo = new JTextField();
-    private JPasswordField password = new JPasswordField();
+    private final PrincipalFrame principal;
+    private final UsuarioDAO dao;
+    private final Usuario usuario;
+    private final JTextField usuarioField = new JTextField();
+    private final JTextField nombre = new JTextField();
+    private final JTextField apellido = new JTextField();
+    private final JTextField telefono = new JTextField();
+    private final JTextField correo = new JTextField();
+    private final JPasswordField password = new JPasswordField();
 
     public UsuarioDialog(JFrame parent, UsuarioDAO dao, Usuario usuario) {
         super(parent, true);
@@ -31,16 +39,32 @@ public class UsuarioDialog extends JDialog {
         this.dao = dao;
         this.usuario = usuario;
         setTitle(usuario == null ? "Nuevo usuario" : "Actualizar usuario");
-        setSize(400, 390);
+        setSize(470, 490);
         setLocationRelativeTo(parent);
 
-        JPanel panel = new JPanel(new GridLayout(13, 1, 5, 5));
-        agregar(panel, "Nombre de usuario:", usuarioField);
-        agregar(panel, "Nombre:", nombre);
-        agregar(panel, "Apellido:", apellido);
-        agregar(panel, "Teléfono:", telefono);
-        agregar(panel, "Correo:", correo);
-        agregar(panel, usuario == null ? "Contraseña:" : "Nueva contraseña (opcional):", password);
+        JPanel principalPanel = new JPanel(new BorderLayout(0, 12));
+        principalPanel.setBorder(BorderFactory.createEmptyBorder(18, 52, 25, 52));
+        principalPanel.setBackground(Color.WHITE);
+
+        JLabel titulo = new JLabel(usuario == null ? "NUEVO USUARIO" : "ACTUALIZAR USUARIO", JLabel.CENTER);
+        titulo.setFont(new Font("Arial", Font.BOLD, 22));
+        principalPanel.add(titulo, BorderLayout.NORTH);
+
+        JPanel formulario = new JPanel(new GridBagLayout());
+        formulario.setBackground(Color.WHITE);
+        GridBagConstraints c = new GridBagConstraints();
+        c.gridx = 0;
+        c.fill = GridBagConstraints.HORIZONTAL;
+        c.weightx = 1;
+        c.insets = new Insets(2, 0, 2, 0);
+        agregar(formulario, c, 0, "Nombre de Usuario", usuarioField);
+        agregar(formulario, c, 2, "Nombre", nombre);
+        agregar(formulario, c, 4, "Apellido", apellido);
+        agregar(formulario, c, 6, "Teléfono", telefono);
+        agregar(formulario, c, 8, "Correo Electrónico", correo);
+        agregar(formulario, c, 10,
+                usuario == null ? "Contraseña" : "Nueva Contraseña (opcional)", password);
+        principalPanel.add(formulario, BorderLayout.CENTER);
 
         if (usuario != null) {
             usuarioField.setText(usuario.getUsuario());
@@ -50,15 +74,24 @@ public class UsuarioDialog extends JDialog {
             correo.setText(usuario.getCorreo());
         }
 
-        JButton guardar = new JButton("Guardar");
+        JPanel botones = new JPanel(new GridLayout(1, 2, 10, 0));
+        botones.setBackground(Color.WHITE);
+        JButton cancelar = new JButton("Cancelar");
+        JButton guardar = new JButton(usuario == null ? "Registrar" : "Guardar Cambios");
+        cancelar.addActionListener(event -> dispose());
         guardar.addActionListener(event -> guardar());
-        panel.add(guardar);
-        add(panel);
+        botones.add(cancelar);
+        botones.add(guardar);
+        principalPanel.add(botones, BorderLayout.SOUTH);
+        add(principalPanel);
     }
 
-    private void agregar(JPanel panel, String texto, JTextField campo) {
-        panel.add(new JLabel(texto));
-        panel.add(campo);
+    private void agregar(JPanel panel, GridBagConstraints c, int fila, String texto, JTextField campo) {
+        c.gridy = fila;
+        panel.add(new JLabel(texto + ":"), c);
+        c.gridy = fila + 1;
+        campo.setPreferredSize(new Dimension(300, 25));
+        panel.add(campo, c);
     }
 
     private void guardar() {
