@@ -5,12 +5,14 @@ import com.tarea4.model.Usuario;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 import java.awt.BorderLayout;
+import java.awt.Font;
 import java.awt.FlowLayout;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,13 +32,16 @@ public class PrincipalFrame extends JFrame {
         setLocationRelativeTo(null);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
+        JLabel titulo = new JLabel("Clientes Registrados", JLabel.CENTER);
+        titulo.setFont(new Font("Arial", Font.BOLD, 22));
+        add(titulo, BorderLayout.NORTH);
         add(new JScrollPane(tabla), BorderLayout.CENTER);
 
         JPanel botones = new JPanel(new FlowLayout());
         JButton nuevo = new JButton("Nuevo");
         JButton actualizar = new JButton("Actualizar");
         JButton eliminar = new JButton("Eliminar");
-        JButton cerrar = new JButton("Cerrar sesión");
+        JButton cerrar = new JButton("Cerrar Sesión");
 
         nuevo.addActionListener(event -> abrirFormulario(null));
         actualizar.addActionListener(event -> actualizar());

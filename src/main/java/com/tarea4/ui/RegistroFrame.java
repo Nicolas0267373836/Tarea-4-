@@ -3,6 +3,7 @@ package com.tarea4.ui;
 import com.tarea4.dao.UsuarioDAO;
 import com.tarea4.model.Usuario;
 
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -10,43 +11,66 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
-import java.awt.GridLayout;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 
 public class RegistroFrame extends JFrame {
 
-    private UsuarioDAO dao;
-    private JTextField usuario = new JTextField();
-    private JTextField nombre = new JTextField();
-    private JTextField apellido = new JTextField();
-    private JTextField telefono = new JTextField();
-    private JTextField correo = new JTextField();
-    private JPasswordField password = new JPasswordField();
-    private JPasswordField confirmar = new JPasswordField();
+    private final UsuarioDAO dao;
+    private final JTextField usuario = new JTextField();
+    private final JTextField nombre = new JTextField();
+    private final JTextField apellido = new JTextField();
+    private final JTextField telefono = new JTextField();
+    private final JTextField correo = new JTextField();
+    private final JPasswordField password = new JPasswordField();
+    private final JPasswordField confirmar = new JPasswordField();
 
     public RegistroFrame(UsuarioDAO dao) {
         this.dao = dao;
         setTitle("Registro de usuario");
-        setSize(420, 480);
+        setSize(460, 550);
         setLocationRelativeTo(null);
 
-        JPanel panel = new JPanel(new GridLayout(15, 1, 5, 5));
-        agregarCampo(panel, "Nombre de usuario:", usuario);
-        agregarCampo(panel, "Nombre:", nombre);
-        agregarCampo(panel, "Apellido:", apellido);
-        agregarCampo(panel, "Número de teléfono:", telefono);
-        agregarCampo(panel, "Correo electrónico:", correo);
-        agregarCampo(panel, "Contraseña:", password);
-        agregarCampo(panel, "Confirmar contraseña:", confirmar);
+        JPanel principal = new JPanel(new BorderLayout(0, 12));
+        principal.setBorder(BorderFactory.createEmptyBorder(18, 52, 25, 52));
+        principal.setBackground(Color.WHITE);
+        JLabel titulo = new JLabel("REGISTRO", JLabel.CENTER);
+        titulo.setFont(new Font("Arial", Font.BOLD, 24));
+        principal.add(titulo, BorderLayout.NORTH);
+
+        JPanel formulario = new JPanel(new GridBagLayout());
+        formulario.setBackground(Color.WHITE);
+        GridBagConstraints c = new GridBagConstraints();
+        c.gridx = 0;
+        c.fill = GridBagConstraints.HORIZONTAL;
+        c.weightx = 1;
+        c.insets = new Insets(2, 0, 2, 0);
+        agregarCampo(formulario, c, 0, "Nombre de Usuario", usuario);
+        agregarCampo(formulario, c, 2, "Nombre", nombre);
+        agregarCampo(formulario, c, 4, "Apellido", apellido);
+        agregarCampo(formulario, c, 6, "Número de Teléfono", telefono);
+        agregarCampo(formulario, c, 8, "Correo Electrónico", correo);
+        agregarCampo(formulario, c, 10, "Contraseña", password);
+        agregarCampo(formulario, c, 12, "Confirmar Contraseña", confirmar);
+        principal.add(formulario, BorderLayout.CENTER);
 
         JButton guardar = new JButton("Registrar");
         guardar.addActionListener(event -> registrar());
-        panel.add(guardar);
-        add(panel);
+        principal.add(guardar, BorderLayout.SOUTH);
+        add(principal);
     }
 
-    private void agregarCampo(JPanel panel, String texto, JTextField campo) {
-        panel.add(new JLabel(texto));
-        panel.add(campo);
+    private void agregarCampo(JPanel panel, GridBagConstraints c, int fila, String texto, JTextField campo) {
+        c.gridy = fila;
+        panel.add(new JLabel(texto + ":"), c);
+        c.gridy = fila + 1;
+        campo.setPreferredSize(new Dimension(290, 25));
+        panel.add(campo, c);
     }
 
     private void registrar() {
