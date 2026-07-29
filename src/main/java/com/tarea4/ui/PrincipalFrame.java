@@ -1,6 +1,7 @@
 package com.tarea4.ui;
 
 import com.tarea4.dao.UsuarioDAO;
+import com.tarea4.model.Persona;
 import com.tarea4.model.Usuario;
 
 import javax.swing.JButton;
@@ -21,14 +22,14 @@ public class PrincipalFrame extends JFrame {
 
     private UsuarioDAO dao;
     private DefaultTableModel model = new DefaultTableModel(
-            new String[]{"Nombre", "Apellido", "Teléfono", "Correo electrónico", "Usuario"}, 0);
+            new String[]{"Nombre", "Apellido", "Teléfono", "Correo electrónico", "Usuario", "Tipo"}, 0);
     private JTable tabla = new JTable(model);
     private List<Usuario> usuarios = new ArrayList<>();
 
     public PrincipalFrame(UsuarioDAO dao) {
         this.dao = dao;
         setTitle("Clientes registrados");
-        setSize(820, 450);
+        setSize(920, 450);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
@@ -61,7 +62,9 @@ public class PrincipalFrame extends JFrame {
             usuarios = dao.listarUsuarios();
             model.setRowCount(0);
             for (Usuario usuario : usuarios) {
-                model.addRow(new Object[]{usuario.getNombre(), usuario.getApellido(), usuario.getTelefono(), usuario.getCorreo(), usuario.getUsuario()});
+                Persona persona = usuario;
+                model.addRow(new Object[]{usuario.getNombre(), usuario.getApellido(), usuario.getTelefono(),
+                        usuario.getCorreo(), usuario.getUsuario(), persona.tipoPersona()});
             }
         } catch (Exception error) {
             JOptionPane.showMessageDialog(this, "No se pudo cargar la lista: " + error.getMessage());

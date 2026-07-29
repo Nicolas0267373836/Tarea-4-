@@ -9,16 +9,15 @@ actualizar sus datos y eliminarlas.
 - Login con usuario y contraseña oculta.
 - Mensajes claros cuando falta el usuario o la contraseña.
 - Registro con todos los campos indicados en el mandato.
-- Validación campo por campo.
+- Validación de campos obligatorios, campo por campo.
 - Validación de contraseñas coincidentes.
-- Validación de formato de usuario, teléfono y correo.
 - Detección de usuario o correo duplicado.
 - Pantalla principal con todos los usuarios registrados.
 - Creación, actualización y eliminación.
 - Actualización automática de la tabla después de cada cambio.
 - Cierre de sesión y regreso a la ventana de login.
 - Contraseñas protegidas con PBKDF2; nunca se guardan en texto plano.
-- Uso de abstracción, encapsulamiento, herencia y polimorfismo.
+- Uso de abstracción, encapsulamiento, herencia y polimorfismo; el tipo de cada persona se muestra en la tabla.
 - Patrones Singleton y Factory.
 - Ejecutable JAR generado por Maven.
 
