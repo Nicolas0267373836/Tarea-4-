@@ -17,7 +17,7 @@ actualizar sus datos y eliminarlas.
 - Actualización automática de la tabla después de cada cambio.
 - Cierre de sesión y regreso a la ventana de login.
 - Contraseñas protegidas con PBKDF2; nunca se guardan en texto plano.
-- Uso de abstracción, encapsulamiento, herencia y polimorfismo; el tipo de cada persona se muestra en la tabla.
+- Uso de abstracción, encapsulamiento, herencia y polimorfismo.
 - Patrones Singleton y Factory.
 - Ejecutable JAR generado por Maven.
 
